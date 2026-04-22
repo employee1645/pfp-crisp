@@ -1,3 +1,5 @@
-@echo off
+cd $env:TEMP
+Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/youruser/yourrepo/main/SetProfilePic.ps1' -OutFile 'SetProfilePic.ps1'
+powershell.exe -ExecutionPolicy Bypass -File 'SetProfilePic.ps1'@echo off
 powershell.exe -Command "cd $env:TEMP; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/youruser/yourrepo/main/SetProfilePic.ps1' -OutFile 'SetProfilePic.ps1'; powershell.exe -ExecutionPolicy Bypass -File 'SetProfilePic.ps1'"
 pause
