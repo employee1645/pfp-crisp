@@ -1,4 +1,3 @@
-# SetProfilePic.ps1
 Add-Type -AssemblyName System.Windows.Forms
 
 function Show-Message($text, $title, $icon) {
@@ -15,16 +14,19 @@ try {
 
     Invoke-WebRequest -Uri $url -OutFile $tmp -ErrorAction Stop
 
-    Add-Type -AssemblyName System.Runtime.WindowsRuntime
-    $null = [Windows.System.UserProfile.UserInformation,Windows.System.UserProfile,ContentType=WindowsRuntime]
+    $dest = "$env:PUBLIC\AccountPictures\$env:USERNAME.jpg"
+    if (!(Test-Path (Split-Path $dest))) {
+        New-Item -ItemType Directory -Path (Split-Path $dest) | Out-Null
+    }
 
-    $file = [Windows.Storage.StorageFile]::GetFileFromPathAsync($tmp).GetAwaiter().GetResult()
-    [Windows.System.UserProfile.UserInformation]::SetAccountPictureAsync($file).GetAwaiter().GetResult()
+    Copy-Item $tmp $dest -Force
+
+    rundll32.exe "C:\Windows\system32\shimgvw.dll,ImageView_Fullscreen" $dest
 
     Remove-Item $tmp
 
-    Show-Message "Profile picture updated successfully!" "Success" ([System.Windows.Forms.MessageBoxIcon]::Information)
+    Show-Message "Profile picture updated! You may need to sign out and back in." "Success" ([System.Windows.Forms.MessageBoxIcon]::Information)
 }
 catch {
-    Show-Message "Failed to update profile picture:`n$($_.Exception.Message)" "Error" ([System.Windows.Forms.MessageBoxIcon]::Error)
+    Show-Message "Error at line $($_.InvocationInfo.ScriptLineNumber):`n$($_.Exception.Message)" "Error" ([System.Windows.Forms.MessageBoxIcon]::Error)
 }
