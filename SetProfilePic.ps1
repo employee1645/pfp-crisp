@@ -1,3 +1,4 @@
+# SetProfilePic.ps1
 Add-Type -AssemblyName System.Windows.Forms
 
 function Show-Message($text, $title, $icon) {
@@ -14,16 +15,11 @@ try {
 
     Invoke-WebRequest -Uri $url -OutFile $tmp -ErrorAction Stop
 
-    $accountPicPath = "$env:APPDATA\Microsoft\Windows\AccountPictures"
-    if (!(Test-Path $accountPicPath)) {
-        New-Item -ItemType Directory -Path $accountPicPath | Out-Null
-    }
+    Add-Type -AssemblyName System.Runtime.WindowsRuntime
+    $null = [Windows.System.UserProfile.UserInformation,Windows.System.UserProfile,ContentType=WindowsRuntime]
 
-    Copy-Item $tmp "$accountPicPath\UserAccountPicture.jpg" -Force
-
-    # Set registry to point to new picture
-    $regPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AccountPicture"
-    Set-ItemProperty -Path $regPath -Name "UserAccountPicture" -Value "$accountPicPath\UserAccountPicture.jpg"
+    $file = [Windows.Storage.StorageFile]::GetFileFromPathAsync($tmp).GetAwaiter().GetResult()
+    [Windows.System.UserProfile.UserInformation]::SetAccountPictureAsync($file).GetAwaiter().GetResult()
 
     Remove-Item $tmp
 
